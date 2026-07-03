@@ -1,35 +1,47 @@
 'use client';
 import { useState } from 'react';
 import SongSearch from '@/components/SongSearch';
+import SeedList from '@/components/SeedList';
 import RecommendationList from '@/components/RecommendationList';
-import { Loader2, X } from 'lucide-react';
+import { Loader2 } from 'lucide-react';
 
 export default function Home() {
-  const [seedTrack, setSeedTrack] = useState(null);
+  const [seedTracks, setSeedTracks] = useState([]);
+  const [vibe, setVibe] = useState('');
   const [recommendations, setRecommendations] = useState([]);
   const [loading, setLoading] = useState(false);
 
   const handleSelectSeed = (song) => {
-    setSeedTrack(song);
-    // Clear previous recommendations when selecting a new seed
+    if (seedTracks.length >= 5) return;
+    // prevent duplicates
+    if (seedTracks.find(s => s.videoId === song.videoId)) return;
+    
+    setSeedTracks([...seedTracks, song]);
     setRecommendations([]);
-    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  const clearSeed = () => {
-    setSeedTrack(null);
+  const removeSeed = (index) => {
+    const newSeeds = [...seedTracks];
+    newSeeds.splice(index, 1);
+    setSeedTracks(newSeeds);
     setRecommendations([]);
   };
 
   const fetchRecommendations = async () => {
-    if (!seedTrack) return;
+    if (seedTracks.length === 0) return;
     setLoading(true);
     try {
-      const res = await fetch(`/api/recommend?videoId=${seedTrack.videoId}`);
+      const res = await fetch('/api/recommend', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ seeds: seedTracks, vibe })
+      });
       if (res.ok) {
         const data = await res.json();
-        // The first track might be the seed itself, we can filter it out, but let's just display all.
         setRecommendations(data);
+        window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+      } else {
+        console.error("Failed to fetch:", await res.text());
       }
     } catch (error) {
       console.error('Failed to fetch recommendations', error);
@@ -41,33 +53,36 @@ export default function Home() {
     <main className="container animate-fade-in">
       <h1 style={{ textAlign: 'center' }}>AI Song Recommender</h1>
       <p style={{ textAlign: 'center', marginBottom: '2rem', color: 'rgba(255,255,255,0.7)' }}>
-        Discover your next favorite track based on what you already love.
+        Discover your next favorite track based on your exact vibe.
       </p>
 
-      {!seedTrack ? (
-        <SongSearch onSelect={handleSelectSeed} />
-      ) : (
-        <div className="glass-panel animate-fade-in" style={{ marginBottom: '2rem', textAlign: 'center' }}>
-          <h2>Your Seed Track</h2>
-          <div className="track-card selected" style={{ display: 'inline-flex', maxWidth: '400px', margin: '1rem auto' }}>
-             {seedTrack.thumbnails && seedTrack.thumbnails.length > 0 && (
-                <img src={seedTrack.thumbnails[0].url} alt={seedTrack.name} className="track-img" />
-              )}
-              <div className="track-info" style={{ textAlign: 'left' }}>
-                <div className="track-title">{seedTrack.name}</div>
-                <div className="track-artist">{seedTrack.artist?.name || (Array.isArray(seedTrack.artists) ? seedTrack.artists.map(a => a.name).join(', ') : seedTrack.artists)}</div>
-              </div>
-              <div className="btn-icon" onClick={clearSeed} style={{ marginLeft: 'auto' }}>
-                <X size={16} />
-              </div>
-          </div>
+      <SongSearch onSelect={handleSelectSeed} />
+
+      {seedTracks.length > 0 && (
+        <>
+          <SeedList seeds={seedTracks} onRemove={removeSeed} />
           
-          <div style={{ marginTop: '1.5rem' }}>
-            <button className="btn-primary" onClick={fetchRecommendations} disabled={loading}>
-              {loading ? <Loader2 className="loader" /> : "Get Recommendations"}
-            </button>
+          <div className="glass-panel animate-fade-in" style={{ marginBottom: '2rem', textAlign: 'center' }}>
+            <h2>What's the vibe?</h2>
+            <p style={{ marginBottom: '1rem', fontSize: '0.9rem', color: 'rgba(255,255,255,0.6)' }}>
+              Describe the mood (e.g. "slow and sad", "late night drive", "ethereal"). The first recommendation will always be Joji!
+            </p>
+            <input 
+              type="text" 
+              className="input-glass" 
+              placeholder="Describe the vibe... (Optional)" 
+              value={vibe}
+              onChange={(e) => setVibe(e.target.value)}
+              style={{ maxWidth: '500px', marginBottom: '1.5rem' }}
+            />
+            
+            <div>
+              <button className="btn-primary" onClick={fetchRecommendations} disabled={loading}>
+                {loading ? <Loader2 className="loader" /> : "Curate My Playlist"}
+              </button>
+            </div>
           </div>
-        </div>
+        </>
       )}
 
       <RecommendationList recommendations={recommendations} />

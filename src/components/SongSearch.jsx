@@ -45,7 +45,11 @@ export default function SongSearch({ onSelect }) {
             <div 
               key={song.videoId} 
               className="track-card animate-fade-in" 
-              onClick={() => onSelect(song)}
+              onClick={() => {
+                onSelect(song);
+                setQuery('');
+                setResults([]);
+              }}
             >
               {song.thumbnails && song.thumbnails.length > 0 && (
                 <img src={song.thumbnails[0].url} alt={song.name} className="track-img" />
