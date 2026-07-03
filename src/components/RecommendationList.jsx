@@ -22,7 +22,7 @@ export default function RecommendationList({ recommendations }) {
             )}
             <div className="track-info">
               <div className="track-title">{song.title}</div>
-              <div className="track-artist">{song.artists?.map(a => a.name).join(', ') || song.artists}</div>
+              <div className="track-artist">{Array.isArray(song.artists) ? song.artists.map(a => a.name).join(', ') : song.artists}</div>
             </div>
             <div className="btn-icon">
               <Play size={16} fill="currentColor" />

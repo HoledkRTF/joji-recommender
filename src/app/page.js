@@ -55,7 +55,7 @@ export default function Home() {
               )}
               <div className="track-info" style={{ textAlign: 'left' }}>
                 <div className="track-title">{seedTrack.name}</div>
-                <div className="track-artist">{seedTrack.artist?.name || seedTrack.artists?.map(a => a.name).join(', ')}</div>
+                <div className="track-artist">{seedTrack.artist?.name || (Array.isArray(seedTrack.artists) ? seedTrack.artists.map(a => a.name).join(', ') : seedTrack.artists)}</div>
               </div>
               <div className="btn-icon" onClick={clearSeed} style={{ marginLeft: 'auto' }}>
                 <X size={16} />

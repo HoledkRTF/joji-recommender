@@ -52,7 +52,7 @@ export default function SongSearch({ onSelect }) {
               )}
               <div className="track-info">
                 <div className="track-title">{song.name}</div>
-                <div className="track-artist">{song.artist?.name || song.artists?.map(a => a.name).join(', ')}</div>
+                <div className="track-artist">{song.artist?.name || (Array.isArray(song.artists) ? song.artists.map(a => a.name).join(', ') : song.artists)}</div>
               </div>
             </div>
           ))}
