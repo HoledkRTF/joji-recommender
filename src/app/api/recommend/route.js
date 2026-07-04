@@ -30,7 +30,7 @@ Return EXACTLY a JSON array of 10 objects. Each object must have a "title" strin
 Do NOT include any markdown formatting, backticks, or explanation. Just the raw JSON array.
 `;
 
-    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+    const model = genAI.getGenerativeModel({ model: "gemini-3.5-flash" });
     const result = await model.generateContent(prompt);
     let aiResponse = result.response.text().trim();
     
