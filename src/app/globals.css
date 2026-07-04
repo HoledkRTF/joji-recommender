@@ -225,3 +225,13 @@ h2 {
 .animate-fade-in {
   animation: fadeIn 0.4s ease forwards;
 }
+
+@keyframes pulse {
+  0% { opacity: 0.6; }
+  50% { opacity: 0.2; }
+  100% { opacity: 0.6; }
+}
+
+.loading-pulse {
+  animation: pulse 1.5s ease-in-out infinite;
+}

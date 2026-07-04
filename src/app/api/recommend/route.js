@@ -1,6 +1,5 @@
 import { NextResponse } from 'next/server';
 import { GoogleGenerativeAI } from '@google/generative-ai';
-import YTMusic from 'ytmusic-api';
 
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || '');
 
@@ -41,27 +40,7 @@ Do NOT include any markdown formatting, backticks, or explanation. Just the raw 
 
     const curatedList = JSON.parse(aiResponse);
 
-    // Now search YT Music for each curated song
-    const ytmusic = new YTMusic();
-    await ytmusic.initialize();
-
-    const trackPromises = curatedList.map(async (item) => {
-      try {
-        const query = `${item.title} ${item.artist}`;
-        const searchResults = await ytmusic.searchSongs(query);
-        if (searchResults && searchResults.length > 0) {
-          return searchResults[0];
-        }
-        return null;
-      } catch (err) {
-        console.error(`Error searching for ${item.title}:`, err);
-        return null;
-      }
-    });
-
-    const resolvedTracks = (await Promise.all(trackPromises)).filter(t => t !== null);
-
-    return NextResponse.json(resolvedTracks);
+    return NextResponse.json(curatedList);
 
   } catch (error) {
     console.error('Recommend error:', error);
